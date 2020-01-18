@@ -150,6 +150,6 @@ public class SnowFlakeGeneratorTest extends Test4J {
      */
     @Test
     public void checkStartStamp() {
-        want.number(SnowFlakeConstant.START_STAMP).eq(1433908800660L);
+        want.number(SnowFlakeConstant.START_STAMP).eq(1420041600000L);
     }
 }

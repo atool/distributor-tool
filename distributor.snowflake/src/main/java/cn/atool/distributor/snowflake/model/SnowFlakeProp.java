@@ -39,9 +39,14 @@ public class SnowFlakeProp {
     @Getter
     private int maxSequence;
 
-
     @Getter
     private boolean init = false;
+    /**
+     * 雪花算法时间戳开始时间点位，默认2015-01-01 00:00:00.000
+     */
+    @Getter
+    @Setter
+    private long startStamp = START_STAMP;
 
     public SnowFlakeProp() {
     }

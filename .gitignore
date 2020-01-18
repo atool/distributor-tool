@@ -24,3 +24,5 @@ hs_err_pid*
 distributor.idempotent/target
 distributor.retry/target
 distributor.snowflake/target
+distributor.base/target
+target

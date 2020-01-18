@@ -25,6 +25,10 @@ public class SnowFlakeGenerator {
      */
     private long sequence = 0L;
     /**
+     * 雪花算法时间戳开始时间点位
+     */
+    private final long startStamp;
+    /**
      * 上次最新时间戳
      */
     private long lastStamp = -1L;
@@ -32,12 +36,13 @@ public class SnowFlakeGenerator {
     /**
      * 分配雪花算法保留位数
      */
-    public SnowFlakeGenerator(SnowFlakeProp prop) {
-        if (!prop.isInit()) {
+    public SnowFlakeGenerator(SnowFlakeProp snowFlakeProp) {
+        if (!snowFlakeProp.isInit()) {
             throw new RuntimeException("the SnowFlakeProp should be init.");
         }
-        this.maxSequenceValue = prop.getMaxSequence();
-        this.workId = prop.getWorkId();
+        this.startStamp = snowFlakeProp.getStartStamp();
+        this.maxSequenceValue = snowFlakeProp.getMaxSequence();
+        this.workId = snowFlakeProp.getWorkId();
     }
 
     /**
@@ -122,7 +127,7 @@ public class SnowFlakeGenerator {
             throw new RuntimeException(String.format("Clock moved backwards. Refusing to generate id for %d milliseconds", lastStamp - currentStamp));
         }
         this.nextSequence(currentStamp);
-        return (this.lastStamp - START_STAMP) << REMAIN_BITS | this.workId | sequence & Long.MAX_VALUE;
+        return (this.lastStamp - this.startStamp) << REMAIN_BITS | this.workId | sequence & Long.MAX_VALUE;
     }
 
     long currentTimeMillis() {
