@@ -16,8 +16,8 @@ public interface RetryPersistence {
      * 查找需要重试的消息列表
      *
      * @param retryCategory 重试事件类型
-     * @param begin         起始记录
-     * @param maxSize       一次查询最大记录数
+     * @param begin         记录查询起始Id
+     * @param maxSize       最大查询记录数
      * @return 返回最多maxSize条状态为status的重试事件
      * @throws RetryException
      */
@@ -26,8 +26,8 @@ public interface RetryPersistence {
     /**
      * 查找指定的重试事件
      *
-     * @param retryCategory
-     * @param retryKey
+     * @param retryCategory 重试事件类型
+     * @param retryKey      重试事件键值
      * @return
      * @throws RetryException
      */
