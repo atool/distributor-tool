@@ -25,7 +25,7 @@ public class RetryHandlerImpl extends ApplicationObjectSupport implements RetryH
     private RetryPersistence retryPersistence;
 
     @Override
-    public <T> void doRetry(RetryBody body, Consumer<Object[]> retryHandler) {
+    public void doRetry(RetryBody body, Consumer<Object[]> retryHandler) {
         Object[] args = body.toObjects();
         try {
             retryHandler.accept(args);

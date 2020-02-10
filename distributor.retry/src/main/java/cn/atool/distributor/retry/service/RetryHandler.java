@@ -18,25 +18,23 @@ public interface RetryHandler {
      * @param category     重试事件类型
      * @param retryKey     重试事件键值
      * @param retryHandler
-     * @param <T>
      */
-    default <T> void doRetry(String category, String retryKey, Consumer<Object[]> retryHandler) {
+    default void doRetry(String category, String retryKey, Consumer<Object[]> retryHandler) {
         RetryBody body = this.getRetryPersistence().findRetry(category, retryKey);
         this.doRetry(body, retryHandler);
     }
 
     /**
-     * 批量执行重试任务
+     * 批量执行重试任务, 一次执行100条事件
      *
      * @param category     重试事件类型
      * @param startId
      * @param retryHandler
-     * @param <T>
-     * @return
+     * @return 返回重试事件最大id
      */
-    default <T> long doRetry(String category, int startId, Consumer<Object[]> retryHandler) {
+    default long doRetry(String category, int startId, Consumer<Object[]> retryHandler) {
         List<RetryBody> list = this.getRetryPersistence().findRetry(category, startId);
-        long baseId = 0L;
+        long baseId = startId;
         for (RetryBody body : list) {
             baseId = Math.max(baseId, body.getId());
             this.doRetry(body, retryHandler);
@@ -49,9 +47,8 @@ public interface RetryHandler {
      *
      * @param body         重试消息体
      * @param retryHandler 重试方法调用
-     * @param <T>
      */
-    <T> void doRetry(RetryBody body, Consumer<Object[]> retryHandler);
+    void doRetry(RetryBody body, Consumer<Object[]> retryHandler);
 
     /**
      * 返回持久化处理器

@@ -75,6 +75,7 @@ public interface RetrySql {
     String CLOSE_RETRY = String.format("UPDATE %s ", Retry_Table) +
             "SET gmt_modified = now(), " +
             "has_retry = has_retry + 1, " +
+            "is_deleted = ?, " +
             String.format("retry_status='%s' ", RetryStatus.FINISH) +
             "WHERE retry_category=? " +
             "AND retry_key = ?";

@@ -36,7 +36,7 @@ public class RetryEventTableMap extends DataMap<RetryEventTableMap> {
     /**
      * 设置distributor_retry_event对象is_deleted字段值
      */
-    @ColumnDef(type = "tinyint(4)")
+    @ColumnDef(type = "bigint(20)")
     public transient final KeyValue<RetryEventTableMap> is_deleted = new KeyValue(this, Column.is_deleted);
     /**
      * 设置distributor_retry_event对象err_message字段值

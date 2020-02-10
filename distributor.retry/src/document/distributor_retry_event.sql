@@ -13,11 +13,10 @@ create table distributor_retry_event
 	err_message varchar(2000) null comment '错误信息',
 	gmt_create datetime not null comment '记录创建时间',
 	gmt_modified datetime not null comment '记录修改时间',
-	is_deleted tinyint default 0 not null comment '逻辑删除',
-	constraint distributor_retry_event_retry_category_retry_key_uindex
-		unique (retry_category, retry_key)
+	is_deleted bigint default 0 not null comment '逻辑删除',
+	constraint udx_distributor_retry_event_category_key_deleted
+		unique (retry_category, retry_key, is_deleted)
 )
 comment '重试事件';
 
-create index inx_retry_event_retry_status
-	on atool.distributor_retry_event (retry_status);
+create index inx_retry_event_retry_status on distributor_retry_event (retry_status);

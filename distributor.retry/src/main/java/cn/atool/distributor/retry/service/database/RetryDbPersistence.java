@@ -77,7 +77,7 @@ public class RetryDbPersistence extends JdbcDaoSupport implements RetryPersisten
     @Override
     public void closeRetry(RetryBody body) {
         try {
-            super.getJdbcTemplate().update(RetrySql.CLOSE_RETRY, body.getRetryCategory(), body.getRetryKey());
+            super.getJdbcTemplate().update(RetrySql.CLOSE_RETRY, System.currentTimeMillis(), body.getRetryCategory(), body.getRetryKey());
         } catch (RuntimeException e1) {
             throw new RetryException(body, e1);
         }
