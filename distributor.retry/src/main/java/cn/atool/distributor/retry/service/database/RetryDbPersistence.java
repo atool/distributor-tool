@@ -20,8 +20,8 @@ public class RetryDbPersistence extends JdbcDaoSupport implements RetryPersisten
     }
 
     @Override
-    public List<RetryBody> findRetry(String bean, String method, long begin) throws RetryException {
-        List<Map<String, Object>> list = super.getJdbcTemplate().queryForList(RetrySql.SELECT_EVENTS, bean, method, begin);
+    public List<RetryBody> findRetry(String retryCategory, long begin) throws RetryException {
+        List<Map<String, Object>> list = super.getJdbcTemplate().queryForList(RetrySql.SELECT_EVENTS, retryCategory, begin);
         List<RetryBody> bodyList = new ArrayList<>();
         for (Map<String, Object> map : list) {
             bodyList.add(new RetryBody(map));
@@ -30,8 +30,8 @@ public class RetryDbPersistence extends JdbcDaoSupport implements RetryPersisten
     }
 
     @Override
-    public RetryBody findRetry(String bean, String method, String retryKey) throws RetryException {
-        List<Map<String, Object>> list = super.getJdbcTemplate().queryForList(RetrySql.SELECT_SPEC_EVENT, bean, method, retryKey);
+    public RetryBody findRetry(String retryCategory, String retryKey) throws RetryException {
+        List<Map<String, Object>> list = super.getJdbcTemplate().queryForList(RetrySql.SELECT_SPEC_EVENT, retryCategory, retryKey);
         if (list == null || list.size() == 0) {
             return null;
         }
@@ -46,10 +46,10 @@ public class RetryDbPersistence extends JdbcDaoSupport implements RetryPersisten
             return bodies;
         }
         for (Map<String, Object> map : list) {
-            bodies.add(new RetryBody().setTargetBean((String) map.get(RetrySql.Field_Target_Bean))
-                    .setTargetClass((String) map.get(RetrySql.Field_Target_Class))
-                    .setTargetMethod((String) map.get(RetrySql.Field_Target_Method))
-                    .setSummary((Long) map.get("summary"))
+            bodies.add(new RetryBody()
+                    .setRetryCategory((String) map.get(RetrySql.Field_Retry_Category))
+                    .setSummary((Long) map.get("summary")
+                    )
             );
         }
         return bodies;
@@ -60,13 +60,13 @@ public class RetryDbPersistence extends JdbcDaoSupport implements RetryPersisten
     public void save(RetryBody body, int maxRetry, Throwable e) throws RetryException {
         try {
             String args = body.getArgsStr();
-            long id = this.findExist(body.getTargetBean(), body.getTargetMethod(), body.getRetryKey());
+            long id = this.findExist(body.getRetryCategory(), body.getRetryKey());
             String err = e.getClass().getName() + "#" + e.getMessage();
             if (id > 0) {
                 super.getJdbcTemplate().update(RetrySql.UPDATE_RETRY, err, id);
             } else {
                 super.getJdbcTemplate().update(RetrySql.SAVE_RETRY,
-                        body.getTargetBean(), body.getTargetClass(), body.getTargetMethod(), body.getRetryKey(), body.getSignature(), body.getProtocol(), args, err, maxRetry);
+                        body.getRetryCategory(), body.getRetryKey(), body.getSignature(), body.getProtocol(), args, err, maxRetry);
             }
         } catch (RuntimeException e1) {
             e1.printStackTrace();
@@ -77,14 +77,14 @@ public class RetryDbPersistence extends JdbcDaoSupport implements RetryPersisten
     @Override
     public void closeRetry(RetryBody body) {
         try {
-            super.getJdbcTemplate().update(RetrySql.CLOSE_RETRY, body.getTargetBean(), body.getTargetMethod(), body.getRetryKey());
+            super.getJdbcTemplate().update(RetrySql.CLOSE_RETRY, body.getRetryCategory(), body.getRetryKey());
         } catch (RuntimeException e1) {
             throw new RetryException(body, e1);
         }
     }
 
-    public long findExist(String bean, String method, String hash) {
-        List<Map<String, Object>> list = super.getJdbcTemplate().queryForList(RetrySql.FIND_EXISTS, bean, method, hash);
+    public long findExist(String retryCategory, String hash) {
+        List<Map<String, Object>> list = super.getJdbcTemplate().queryForList(RetrySql.FIND_EXISTS, retryCategory, hash);
         if (list == null || list.size() == 0) {
             return 0L;
         } else {

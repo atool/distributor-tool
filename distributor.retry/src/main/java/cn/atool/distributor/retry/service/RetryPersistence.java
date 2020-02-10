@@ -15,24 +15,22 @@ public interface RetryPersistence {
     /**
      * 查找需要重试的消息列表
      *
-     * @param bean   重试实体
-     * @param method 重试方法
-     * @param begin  起始记录
+     * @param retryCategory 重试事件类型
+     * @param begin         起始记录
      * @return 最多返回100条状态为status的重试事件
      * @throws RetryException
      */
-    List<RetryBody> findRetry(String bean, String method, long begin) throws RetryException;
+    List<RetryBody> findRetry(String retryCategory, long begin) throws RetryException;
 
     /**
      * 查找指定的重试事件
      *
-     * @param bean
-     * @param method
+     * @param retryCategory
      * @param retryKey
      * @return
      * @throws RetryException
      */
-    RetryBody findRetry(String bean, String method, String retryKey) throws RetryException;
+    RetryBody findRetry(String retryCategory, String retryKey) throws RetryException;
 
     /**
      * 统计

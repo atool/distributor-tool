@@ -17,18 +17,17 @@ public interface RetrySql {
      * 新增重试消息
      */
     String SAVE_RETRY = "INSERT INTO " + Retry_Table +
-            "(target_bean, target_class, target_method, retry_key, method_signature, protocol, method_args " +
+            "(retry_category, retry_key, method_signature, protocol, method_args " +
             ", retry_status, err_message, max_retry, has_retry, gmt_create, gmt_modified, is_deleted) " +
-            "VALUES(?, ?, ?, ?, ?, ?, ?" +
+            "VALUES(?, ?, ?, ?, ?" +
             String.format(", '%s', ?, ?, 0, now(), now(), 0)", RetryStatus.FAILURE);
 
     /**
      * 批量查询重试消息
      */
-    String SELECT_EVENTS = "SELECT id, target_bean, target_class, target_method, retry_key, method_signature, protocol, method_args " +
+    String SELECT_EVENTS = "SELECT id, retry_category, retry_key, method_signature, protocol, method_args " +
             String.format("FROM %s ", Retry_Table) +
-            "WHERE target_bean=? " +
-            "AND target_method=? " +
+            "WHERE retry_category=? " +
             String.format("AND retry_status = '%s' ", RetryStatus.FAILURE) +
             "AND has_retry < max_retry " +
             "AND is_deleted=0 " +
@@ -39,27 +38,25 @@ public interface RetrySql {
     /**
      * 聚合统计重试消息
      */
-    String SUMMARY_EVENTS = "SELECT target_bean, target_class, target_method, count(1) as summary " +
+    String SUMMARY_EVENTS = "SELECT retry_category, count(1) as summary " +
             String.format("FROM %s ", Retry_Table) +
             "WHERE is_deleted=0 " +
             "AND retry_status=? " +
-            "GROUP BY target_bean, target_class, target_method";
+            "GROUP BY retry_category";
 
     /**
      * 根据重试事件业务键值获取重试事件id
      */
     String FIND_EXISTS = "SELECT id " +
             String.format("FROM %s ", Retry_Table) +
-            "WHERE target_bean=? " +
-            "AND target_method=? " +
+            "WHERE retry_category=? " +
             "AND retry_key=?";
     /**
      * 根据重试事件业务键值获取重试事件
      */
-    String SELECT_SPEC_EVENT = "SELECT id, target_bean, target_class, target_method, retry_key, method_signature, protocol, method_args " +
+    String SELECT_SPEC_EVENT = "SELECT id, retry_category, retry_key, method_signature, protocol, method_args " +
             String.format("FROM %s ", Retry_Table) +
-            "WHERE target_bean=? " +
-            "AND target_method=? " +
+            "WHERE retry_category=? " +
             "AND retry_key=? " +
             "AND is_deleted=0 " +
             String.format("AND retry_status = '%s' ", RetryStatus.FAILURE);
@@ -79,8 +76,7 @@ public interface RetrySql {
             "SET gmt_modified = now(), " +
             "has_retry = has_retry + 1, " +
             String.format("retry_status='%s' ", RetryStatus.FINISH) +
-            "WHERE target_bean=? " +
-            "and target_method=? " +
+            "WHERE retry_category=? " +
             "AND retry_key = ?";
 
     /**
@@ -88,19 +84,11 @@ public interface RetrySql {
      */
     String Field_Id = "id";
     /**
-     * 字段: 重试对象bean定义
+     * 字段: 重试事件分类标识
      */
-    String Field_Target_Bean = "target_bean";
+    String Field_Retry_Category = "retry_category";
     /**
-     * 字段: 重试对象类型
-     */
-    String Field_Target_Class = "target_class";
-    /**
-     * 字段: 重试方法名称
-     */
-    String Field_Target_Method = "target_method";
-    /**
-     * 字段: 重试键值
+     * 字段: 重试事件键值
      */
     String Field_Retry_Key = "retry_key";
     /**

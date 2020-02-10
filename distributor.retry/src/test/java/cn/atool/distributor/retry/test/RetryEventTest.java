@@ -43,7 +43,7 @@ public class RetryEventTest extends Test4J {
         db.table(TABLE_RETRY_EVENT).clean();
         assertThrows(RuntimeException.class, () -> bizService.doSomeThing("request1", 11, Arrays.asList("list1", "list2")));
         db.table(TABLE_RETRY_EVENT).query().eqDataMap(new RetryEventTableMap(1)
-                .with(this::setMethod1)
+                .with(this::setMethod_3)
                 .retry_status.values(RetryStatus.FAILURE)
                 .has_retry.values(0)
         );
@@ -52,13 +52,13 @@ public class RetryEventTest extends Test4J {
     @Test
     void retry_method1_again_fail() {
         db.table(TABLE_RETRY_EVENT).clean().insert(new RetryEventTableMap(1).init()
-                .with(this::setMethod1)
+                .with(this::setMethod_3)
                 .retry_status.values(RetryStatus.FAILURE)
                 .has_retry.values(0)
         );
         assertThrows(RuntimeException.class, () -> bizService.doSomeThing("request1", 11, Arrays.asList("list1", "list2")));
         db.table(TABLE_RETRY_EVENT).query().eqDataMap(new RetryEventTableMap(1)
-                .with(this::setMethod1)
+                .with(this::setMethod_3)
                 .retry_status.values(RetryStatus.FAILURE)
                 .has_retry.values(1)
         );
@@ -67,14 +67,16 @@ public class RetryEventTest extends Test4J {
     @Test
     void retry_method1_again_fail2() {
         db.table(TABLE_RETRY_EVENT).clean().insert(new RetryEventTableMap(1).init()
-                .with(this::setMethod1)
+                .with(this::setMethod_3)
                 .retry_status.values(RetryStatus.FAILURE)
                 .has_retry.values(2)
         );
         db.table(TABLE_RETRY_EVENT).query().print();
-        assertThrows(RuntimeException.class, () -> this.retryHandler.doRetry("bizServiceImpl", "doSomeThing", "request1", null));
+        assertThrows(RuntimeException.class, () -> this.retryHandler.doRetry("doSomeThing_3", "request1", (args) -> {
+            bizService.doSomeThing((String) args[0], (Integer) args[1], (List<String>) args[2]);
+        }));
         db.table(TABLE_RETRY_EVENT).query().eqDataMap(new RetryEventTableMap(1)
-                .with(this::setMethod1)
+                .with(this::setMethod_3)
                 .retry_status.values(RetryStatus.EXCEED)
                 .has_retry.values(3)
         );
@@ -83,7 +85,7 @@ public class RetryEventTest extends Test4J {
     @Test
     void retry_method1_again_success() {
         db.table(TABLE_RETRY_EVENT).clean().insert(new RetryEventTableMap(1).init()
-                .with(this::setMethod1)
+                .with(this::setMethod_3)
                 .retry_status.values(RetryStatus.FAILURE)
                 .has_retry.values(2)
         );
@@ -93,22 +95,21 @@ public class RetryEventTest extends Test4J {
                 return new HashMap<>();
             }
         };
-        this.retryHandler.doRetry("bizServiceImpl", "doSomeThing", "request1", (result, args) -> {
-            want.map((Map) result).notNull().sizeEq(0);
+        this.retryHandler.doRetry("doSomeThing_3", "request1", (args) -> {
             want.array(args).eqReflect(new Object[]{"request1", 11, Arrays.asList("list1", "list2")});
+            Map result = this.bizService.doSomeThing((String) args[0], (Integer) args[1], (List<String>) args[2]);
+            want.map(result).notNull().sizeEq(0);
         });
         db.table(TABLE_RETRY_EVENT).query()
                 .eqDataMap(new RetryEventTableMap(1)
-                        .with(this::setMethod1)
+                        .with(this::setMethod_3)
                         .retry_status.values(RetryStatus.FINISH)
                         .has_retry.values(3)
                 );
     }
 
-    RetryEventTableMap setMethod1(RetryEventTableMap map) {
-        return map.target_bean.values("bizServiceImpl")
-                .target_class.values(BizServiceImpl.class.getName())
-                .target_method.values("doSomeThing")
+    RetryEventTableMap setMethod_3(RetryEventTableMap map) {
+        return map.retry_category.values("doSomeThing_3")
                 .retry_key.values("request1")
                 .method_signature.values("(java.lang.String,java.lang.Integer,java.util.List)")
                 .max_retry.values(3)
@@ -144,9 +145,10 @@ public class RetryEventTest extends Test4J {
                 return new HashMap<>();
             }
         };
-        this.retryHandler.doRetry("bizServiceImpl", "doSomeThing", "3nnat27fk7zocfvtxiupufmg4", (result, args) -> {
-            want.map((Map) result).notNull().sizeEq(0);
+        this.retryHandler.doRetry("doSomeThing_2", "3nnat27fk7zocfvtxiupufmg4", (args) -> {
             want.array(args).eqReflect(new Object[]{11, Arrays.asList("list1", "list2")});
+            Map result = bizService.doSomeThing((Integer) args[0], (List<String>) args[1]);
+            want.map(result).notNull().sizeEq(0);
         });
         db.table(TABLE_RETRY_EVENT).query().eqDataMap(new RetryEventTableMap(1)
                 .with(this::setMethod2)
@@ -157,9 +159,7 @@ public class RetryEventTest extends Test4J {
 
 
     RetryEventTableMap setMethod2(RetryEventTableMap map) {
-        return map.target_bean.values("bizServiceImpl")
-                .target_class.values(BizServiceImpl.class.getName())
-                .target_method.values("doSomeThing")
+        return map.retry_category.values("doSomeThing_2")
                 .retry_key.values("3nnat27fk7zocfvtxiupufmg4")
                 .method_signature.values("(java.lang.Integer,java.util.List)")
                 .max_retry.values(3)
@@ -174,7 +174,7 @@ public class RetryEventTest extends Test4J {
     @Test
     public void batch_retry() {
         db.table(TABLE_RETRY_EVENT).clean().insert(new RetryEventTableMap(1).init()
-                .with(this::setMethod1)
+                .with(this::setMethod_3)
                 .id.values(1)
                 .retry_status.values(RetryStatus.FAILURE)
         ).insert(new RetryEventTableMap(1).init()
@@ -188,33 +188,31 @@ public class RetryEventTest extends Test4J {
                 return new HashMap<>();
             }
         };
-        long id = this.retryHandler.doRetry("bizServiceImpl", "doSomeThing", 0, (result, args) -> {
+        this.retryHandler.doRetry("doSomeThing_3", 0, (args) -> {
+            this.bizService.doSomeThing((String) args[0], (Integer) args[1], (List<String>) args[2]);
+        });
+        this.retryHandler.doRetry("doSomeThing_2", 0, (args) -> {
+            this.bizService.doSomeThing((Integer) args[0], (List<String>) args[1]);
         });
         db.table(TABLE_RETRY_EVENT).query().eqDataMap(new RetryEventTableMap(2)
-                .target_class.values(BizServiceImpl.class.getName())
-                .target_method.values("doSomeThing")
+                .retry_category.values("doSomeThing_3", "doSomeThing_2")
                 .retry_status.values(RetryStatus.FINISH)
                 .has_retry.values(1)
                 .retry_key.values("request1", "3nnat27fk7zocfvtxiupufmg4")
         );
-        want.number(id).isGt(1L);
     }
 
     @Test
     public void summary_retry() {
         db.table(TABLE_RETRY_EVENT).clean().insert(new RetryEventTableMap(5).init()
-                .target_bean.values("bizServiceImpl")
-                .target_class.values(BizServiceImpl.class.getName())
-                .target_method.values("method1", "method2", "method1", "method2", "method1")
+                .retry_category.values("method1", "method2", "method1", "method2", "method1")
                 .retry_status.values(RetryStatus.FAILURE, RetryStatus.FAILURE, RetryStatus.FINISH, RetryStatus.FAILURE)
                 .is_deleted.values(0)
         );
 
         List<RetryBody> bodies = this.retryHandler.getRetryPersistence().summaryRetry(RetryStatus.FAILURE);
         want.list(bodies).eqDataMap(new DataMap(2)
-                .kv("targetBean", "bizServiceImpl")
-                .kv("targetClass", BizServiceImpl.class.getName())
-                .kv("targetMethod", "method1", "method2")
+                .kv("retryCategory", "method1", "method2")
                 .kv("summary", 2, 2)
         );
     }

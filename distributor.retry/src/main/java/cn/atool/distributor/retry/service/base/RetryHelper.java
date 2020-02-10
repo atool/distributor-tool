@@ -19,20 +19,14 @@ public class RetryHelper {
     /**
      * 重试信息构建
      *
-     * @param targetBean 重试目标bean
-     * @param pjp        切面
-     * @param retry      重试注解
+     * @param pjp   切面
+     * @param retry 重试注解
      * @return
      */
-    public static RetryBody buildRetryBody(String targetBean, ProceedingJoinPoint pjp, Retry retry) {
-        String retryKey = KeyGenerator.key(retry.retryKey(), pjp);
-
+    public static RetryBody buildRetryBody(ProceedingJoinPoint pjp, Retry retry) {
         List<MethodArg> args = getMethodArgs(retry.protocol(), pjp);
-        MethodSignature ms = (MethodSignature) pjp.getSignature();
-        String targetClass = ms.getDeclaringTypeName();
-        String targetMethod = ms.getName();
-        RetryBody body = new RetryBody(targetBean, targetClass, targetMethod, args, retry.protocol());
-        body.setRetryKey(retryKey);
+        String retryKey = KeyGenerator.key(retry.key(), pjp);
+        RetryBody body = new RetryBody(retry.category(), retryKey, args, retry.protocol());
         return body;
     }
 

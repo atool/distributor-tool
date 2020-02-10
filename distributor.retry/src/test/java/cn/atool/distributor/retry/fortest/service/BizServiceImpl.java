@@ -12,13 +12,13 @@ import java.util.Map;
  */
 @Component
 public class BizServiceImpl implements BizService {
-    @Retry(retryKey = "${requestId}")
+    @Retry(category = "doSomeThing_3", key = "${requestId}")
     @Override
     public Map<String, String> doSomeThing(String requestId, Integer arg1, List<String> arg2) {
         return this.doSomeThing(arg1, arg2);
     }
 
-    @Retry
+    @Retry(category = "doSomeThing_2")
     @Override
     public Map<String, String> doSomeThing(Integer arg1, List<String> arg2) {
         throw new RuntimeException("test exception");

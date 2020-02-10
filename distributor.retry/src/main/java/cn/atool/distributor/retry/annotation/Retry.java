@@ -19,18 +19,26 @@ import static cn.atool.distributor.serialize.SerializeProtocol.FAST_JSON;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Retry {
     /**
-     * 重试key值构造 ongl表达式, 如果是空，则取参数列表的md5值作为重试键值
+     * 重试事件分类
      *
      * @return
      */
-    String retryKey() default "";
+    String category();
+
+    /**
+     * 重试事件key值构造 ongl表达式
+     * 如果没有指定，使用参数的md5值
+     *
+     * @return
+     */
+    String key() default "";
 
     /**
      * 异步重试，消息持久化保存bean
      *
      * @return
      */
-    String retryPersistence() default RetryConstant.Retry_Db_Persistence_Bean;
+    String persistence() default RetryConstant.Retry_Db_Persistence_Bean;
 
     /**
      * 重试参数序列化协议

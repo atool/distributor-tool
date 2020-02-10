@@ -25,11 +25,9 @@ public interface RetryEventMP {
             this.put(Property.methodArgs, Column.method_args);
             this.put(Property.methodSignature, Column.method_signature);
             this.put(Property.protocol, Column.protocol);
+            this.put(Property.retryCategory, Column.retry_category);
             this.put(Property.retryKey, Column.retry_key);
             this.put(Property.retryStatus, Column.retry_status);
-            this.put(Property.targetBean, Column.target_bean);
-            this.put(Property.targetClass, Column.target_class);
-            this.put(Property.targetMethod, Column.target_method);
         }
     };
 
@@ -43,7 +41,7 @@ public interface RetryEventMP {
     String Entity_NAME = "RetryEventEntity";
 
     /**
-     * 表atool_retry_event字段定义
+     * 表distributor_retry_event字段定义
      */
     interface Column{
         /**
@@ -87,6 +85,10 @@ public interface RetryEventMP {
          */
         String protocol = "protocol";
         /**
+         * 重试事件标识
+         */
+        String retry_category = "retry_category";
+        /**
          * 重试事件幂等key值
          */
         String retry_key = "retry_key";
@@ -94,18 +96,6 @@ public interface RetryEventMP {
          * 重试状态
          */
         String retry_status = "retry_status";
-        /**
-         * 重试方法目标spring bean定义
-         */
-        String target_bean = "target_bean";
-        /**
-         * 重试方法目标类型
-         */
-        String target_class = "target_class";
-        /**
-         * 重试方法名称
-         */
-        String target_method = "target_method";
     }
 
     /**
@@ -153,6 +143,10 @@ public interface RetryEventMP {
          */
         String protocol = "protocol";
         /**
+         * 重试事件标识
+         */
+        String retryCategory = "retryCategory";
+        /**
          * 重试事件幂等key值
          */
         String retryKey = "retryKey";
@@ -160,17 +154,5 @@ public interface RetryEventMP {
          * 重试状态
          */
         String retryStatus = "retryStatus";
-        /**
-         * 重试方法目标spring bean定义
-         */
-        String targetBean = "targetBean";
-        /**
-         * 重试方法目标类型
-         */
-        String targetClass = "targetClass";
-        /**
-         * 重试方法名称
-         */
-        String targetMethod = "targetMethod";
     }
 }

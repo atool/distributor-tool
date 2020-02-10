@@ -94,10 +94,8 @@ public class RetryAspect extends ApplicationObjectSupport {
         if (retry.asyncMaxRetry() <= 0 || !needRetry(retry, e)) {
             return;
         }
-        String targetBean = this.findTargetBean(pjp);
 
-        RetryBody body = RetryHelper.buildRetryBody(targetBean, pjp, retry);
-
+        RetryBody body = RetryHelper.buildRetryBody(pjp, retry);
         RetryPersistence handler = this.findPersistence(retry);
         if (handler == null) {
             throw new RetryException(body, e);
@@ -105,21 +103,9 @@ public class RetryAspect extends ApplicationObjectSupport {
         handler.save(body, retry.asyncMaxRetry(), e);
     }
 
-    private String findTargetBean(ProceedingJoinPoint pjp) {
-        Object target = pjp.getTarget();
-        String[] beans = super.getApplicationContext().getBeanNamesForType(target.getClass());
-        if (beans == null || beans.length == 0) {
-            throw new RetryException("not found target bean for class:" + target.getClass().getName());
-        }
-        if (beans.length > 1) {
-            throw new RetryException("too much target bean for class:" + target.getClass().getName());
-        }
-        return beans[0];
-    }
-
     private RetryPersistence findPersistence(Retry retry) {
         try {
-            RetryPersistence persistence = (RetryPersistence) getApplicationContext().getBean(retry.retryPersistence());
+            RetryPersistence persistence = (RetryPersistence) getApplicationContext().getBean(retry.persistence());
             return persistence;
         } catch (Throwable e) {
             log.warn("findHandler error: {}", e.getMessage(), e);

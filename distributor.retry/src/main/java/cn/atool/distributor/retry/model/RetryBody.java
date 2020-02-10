@@ -20,19 +20,11 @@ import java.util.Map;
 public class RetryBody {
     private transient long id;
     /**
-     * 定义异步重试消息持久化的spring bean
+     * 重试事件分类标识
      */
-    private transient String targetBean;
+    private transient String retryCategory;
     /**
-     * 方法入口类
-     */
-    private transient String targetClass;
-    /**
-     * 重试方法
-     */
-    private transient String targetMethod;
-    /**
-     * 重试幂等键值
+     * 重试事件幂等键值
      */
     private transient String retryKey;
     /**
@@ -67,17 +59,14 @@ public class RetryBody {
         this((String) map.get(RetrySql.Field_Protocol));
         this.setArgs((String) map.get(RetrySql.Field_Method_Args))
                 .setId((Long) map.get(RetrySql.Field_Id))
-                .setTargetBean((String) map.get(RetrySql.Field_Target_Bean))
-                .setTargetClass((String) map.get(RetrySql.Field_Target_Class))
-                .setTargetMethod((String) map.get(RetrySql.Field_Target_Method))
+                .setRetryCategory((String) map.get(RetrySql.Field_Retry_Category))
                 .setRetryKey((String) map.get(RetrySql.Field_Retry_Key))
                 .setSignature((String) map.get(RetrySql.Field_Method_Signature));
     }
 
-    public RetryBody(String targetBean, String targetClass, String targetMethod, List<MethodArg> args, String protocol) {
-        this.targetBean = targetBean;
-        this.targetClass = targetClass;
-        this.targetMethod = targetMethod;
+    public RetryBody(String category, String retryKey, List<MethodArg> args, String protocol) {
+        this.retryCategory = category;
+        this.retryKey = retryKey;
         this.args = args;
         this.signature = this.signature();
         this.protocol = protocol;
