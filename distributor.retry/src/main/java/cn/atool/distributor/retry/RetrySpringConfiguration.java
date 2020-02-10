@@ -1,7 +1,9 @@
 package cn.atool.distributor.retry;
 
 import cn.atool.distributor.retry.service.RetryAspect;
+import cn.atool.distributor.retry.service.RetryHandler;
 import cn.atool.distributor.retry.service.RetryPersistence;
+import cn.atool.distributor.retry.service.base.RetryHandlerImpl;
 import cn.atool.distributor.retry.service.database.RetryDbPersistence;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -36,6 +38,11 @@ public abstract class RetrySpringConfiguration {
     @Qualifier(Retry_Db_Persistence_Bean)
     public RetryPersistence retryDbPersistence() {
         return new RetryDbPersistence(retryPersistenceDataSource());
+    }
+
+    @Bean
+    public RetryHandler retryHandler(@Qualifier(Retry_Db_Persistence_Bean) RetryPersistence retryPersistence) {
+        return new RetryHandlerImpl().setRetryPersistence(retryPersistence);
     }
 
     /**

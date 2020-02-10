@@ -206,6 +206,7 @@ public class RetryEventTest extends Test4J {
     public void summary_retry() {
         db.table(TABLE_RETRY_EVENT).clean().insert(new RetryEventTableMap(5).init()
                 .retry_category.values("method1", "method2", "method1", "method2", "method1")
+                .retry_key.autoIncrease()
                 .retry_status.values(RetryStatus.FAILURE, RetryStatus.FAILURE, RetryStatus.FINISH, RetryStatus.FAILURE)
                 .is_deleted.values(0)
         );

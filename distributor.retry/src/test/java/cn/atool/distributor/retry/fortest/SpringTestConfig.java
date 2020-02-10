@@ -32,9 +32,4 @@ public class SpringTestConfig extends RetrySpringConfiguration {
     public DataSource retryPersistenceDataSource() {
         return dataSource();
     }
-
-    @Bean
-    public RetryHandler retryHandler() {
-        return new RetryHandlerImpl().setRetryPersistence(retryDbPersistence());
-    }
 }
