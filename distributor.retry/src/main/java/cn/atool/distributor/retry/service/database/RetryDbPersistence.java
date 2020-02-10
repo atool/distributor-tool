@@ -20,8 +20,8 @@ public class RetryDbPersistence extends JdbcDaoSupport implements RetryPersisten
     }
 
     @Override
-    public List<RetryBody> findRetry(String retryCategory, long begin) throws RetryException {
-        List<Map<String, Object>> list = super.getJdbcTemplate().queryForList(RetrySql.SELECT_EVENTS, retryCategory, begin);
+    public List<RetryBody> findRetry(String retryCategory, long begin, int maxSize) throws RetryException {
+        List<Map<String, Object>> list = super.getJdbcTemplate().queryForList(RetrySql.SELECT_EVENTS, retryCategory, begin, maxSize);
         List<RetryBody> bodyList = new ArrayList<>();
         for (Map<String, Object> map : list) {
             bodyList.add(new RetryBody(map));

@@ -30,16 +30,17 @@ public interface RetryHandler {
      * @param category     重试事件类型
      * @param startId
      * @param retryHandler
-     * @return 返回重试事件最大id
+     * @return 返回100条重试事件最大id, 如果一批不足100条，返回0
      */
     default long doRetry(String category, int startId, Consumer<Object[]> retryHandler) {
-        List<RetryBody> list = this.getRetryPersistence().findRetry(category, startId);
-        long baseId = startId;
+        int maxSize = 100;
+        List<RetryBody> list = this.getRetryPersistence().findRetry(category, startId, maxSize);
+        long maxId = startId;
         for (RetryBody body : list) {
-            baseId = Math.max(baseId, body.getId());
+            maxId = Math.max(maxId, body.getId());
             this.doRetry(body, retryHandler);
         }
-        return baseId;
+        return list.size() == maxSize ? maxId : 0L;
     }
 
     /**

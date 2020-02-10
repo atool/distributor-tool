@@ -33,7 +33,7 @@ public interface RetrySql {
             "AND is_deleted=0 " +
             "AND id >= ? " +
             "ORDER BY id+0 " +
-            "LIMIT 100";
+            "LIMIT ?";
 
     /**
      * 聚合统计重试消息
