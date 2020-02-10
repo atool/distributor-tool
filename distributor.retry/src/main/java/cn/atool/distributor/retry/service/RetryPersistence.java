@@ -18,7 +18,7 @@ public interface RetryPersistence {
      * @param retryCategory 重试事件类型
      * @param begin         起始记录
      * @param maxSize       一次查询最大记录数
-     * @return 最多返回100条状态为status的重试事件
+     * @return 返回最多maxSize条状态为status的重试事件
      * @throws RetryException
      */
     List<RetryBody> findRetry(String retryCategory, long begin, int maxSize) throws RetryException;
