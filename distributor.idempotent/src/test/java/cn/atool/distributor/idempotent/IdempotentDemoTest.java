@@ -7,6 +7,7 @@ import cn.atool.distributor.idempotent.model.IdemStatus;
 import cn.atool.distributor.idempotent.fortest.datamap.IdempotentMP;
 import cn.atool.distributor.idempotent.fortest.service.IdempotentService;
 import cn.atool.distributor.serialize.SerializeProtocol;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
@@ -32,7 +33,6 @@ public class IdempotentDemoTest extends Test4J {
     @Autowired
     private IdempotentService service;
 
-
     @Test
     public void test_normal() {
         db.table(Idem_Table).clean();
@@ -54,6 +54,35 @@ public class IdempotentDemoTest extends Test4J {
                 .idem_value.values("{\"test\":\"test\"}")
                 .expire_time.values(31536000)
                 .idem_status.values(IdemStatus.COMMIT)
+        );
+    }
+
+    @Test
+    public void test__manual_normal() throws Throwable {
+        db.table(Idem_Table).clean();
+        String result = service.doIdemInManual("test_manual_input");
+        want.string(result).eq("manual");
+        db.table(Idem_Table).query().eqDataMap(IdempotentTableMap.create(1)
+                .idem_type.values("IdemInManual")
+                .idem_key.values("Key-test_manual_input")
+                .protocol.values(SerializeProtocol.FAST_JSON)
+                .idem_value.values("\"manual\"")
+                .expire_time.values(31536000)
+                .idem_status.values(IdemStatus.COMMIT)
+        );
+    }
+
+    @Test
+    public void test__manual_normal_failure() throws Throwable {
+        db.table(Idem_Table).clean();
+        Assertions.assertThrows(RuntimeException.class, () -> service.doIdemInManual("failure"));
+        db.table(Idem_Table).query().eqDataMap(IdempotentTableMap.create(1)
+                .idem_type.values("IdemInManual")
+                .idem_key.values("Key-failure")
+                .protocol.values(SerializeProtocol.FAST_JSON)
+                .idem_value.values((Object) null)
+                .expire_time.values(31536000)
+                .idem_status.values(IdemStatus.ROLLBACK)
         );
     }
 

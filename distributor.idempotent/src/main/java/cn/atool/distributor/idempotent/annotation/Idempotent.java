@@ -34,6 +34,26 @@ public @interface Idempotent {
     String key();
 
     /**
+     * 是否自动记录幂等信息，提交和回滚<br/>
+     * if false，需要开发者在需要的地方手动调用。如果需要，可以把IdemOp.doIdempotent放到事务中一起控制
+     * <pre>
+     *     @ Idempotent(key = "key ognl表达式", auto = false)
+     *     public String exampleFunction(String input) throws Throwable {
+     *         // 前置操作
+     *         String result = IdemOp.doIdempotent(() -> {
+     *             //执行业务逻辑
+     *             return "output";
+     *         });
+     *         // 后置操作
+     *         return result;
+     *     }
+     *  </pre>
+     *
+     * @return
+     */
+    boolean auto() default true;
+
+    /**
      * 幂等持久化处理bean，必须实现接口 {@code IdempotentPersistence}
      * 默认采用数据库形式持久化
      *

@@ -1,6 +1,7 @@
 package cn.atool.distributor.idempotent.fortest.service;
 
 import cn.atool.distributor.idempotent.annotation.Idempotent;
+import cn.atool.distributor.idempotent.service.IdemOp;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -32,5 +33,20 @@ public class IdempotentService {
     @Idempotent(key = "Key_${input}")
     public String doExpired(String input) {
         return "test2";
+    }
+
+    @Idempotent(type = "IdemInManual", key = "Key-${input}", auto = false)
+    public String doIdemInManual(String input) throws Throwable {
+        // 前置操作
+        String result = IdemOp.doIdempotent(() -> {
+            //执行业务逻辑
+            if ("failure".equals(input)) {
+                throw new RuntimeException("failure");
+            } else {
+                return "manual";
+            }
+        });
+        // 后置操作
+        return result;
     }
 }

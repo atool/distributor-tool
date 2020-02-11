@@ -43,16 +43,9 @@ public class IdempotentAspect extends ApplicationObjectSupport {
         IdemValue idemValueObject = persistence.existIdempotent(body);
         if (idemValueObject != null) {
             return persistence.strategy(body, idemValueObject.getValue());
-        }
-        persistence.begin(body);
-        try {
-            Object result = pjp.proceed();
-            persistence.commit(body, result);
-            return result;
-        } catch (Exception e) {
-            log.error("Do Idempotent Error : {}, rollback idempotent.", SerializeFactory.protocol(idempotent.protocol()).toString(pjp.getArgs()), e);
-            persistence.delete(body, IdemStatus.ROLLBACK);
-            throw e;
+        } else {
+            IdemOp.setContext(persistence, body);
+            return idempotent.auto() ? IdemOp.doIdempotent(pjp::proceed) : pjp.proceed();
         }
     }
 
