@@ -19,7 +19,7 @@
         <module>distributor.snowflake</module>
     </modules>
     <properties>
-        <spring.version>4.3.17.RELEASE</spring.version>
+        <spring.version>5.2.20.RELEASE</spring.version>
         <jmockit.version>1.48</jmockit.version>
         <maven.compiler.target>1.8</maven.compiler.target>
         <maven.compiler.source>1.8</maven.compiler.source>
